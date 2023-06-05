@@ -2,7 +2,7 @@ import sys
 sys.path.append('./')
 
 from modulos.dou_api.inlabs import InlabsCrawler
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import glob
 from zipfile import ZipFile, BadZipFile
 import os
@@ -10,38 +10,16 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import pandas as pd
 import re
-from sqlalchemy.orm import sessionmaker
-import hashlib
-import json
 import shutil
 
+from modulos.orgao_base import BaseOrgao
 
-from db.models import Tramites, TramiteDetalhes, TramitesHasTermos, ProjetosHasTramites
-from modulos.utils import summarize
-
-import db.conn as db
-
-class DouCrawler:
+class DouCrawler(BaseOrgao):
     def __init__(self, termos, projeto):
-        # self.termos_lista = termos
-        # self.termos = [ " "+t+" " for t in termos.keys() ]
-        self.termos_lista = {termo.lower(): valor for termo, valor in termos.items()}
-        self.termos = [ t.lower() for t in termos.keys() ]
-        self.projeto = projeto
-        self.orgao_id = 1
-        self.all_tramites_hash = self.get_all_tramites()
-    
+        super().__init__(termos=termos, projeto=projeto, orgao_id=1)
+        
     def __str__(self) -> str:
         return f'DouCrawler({self.termos}, {self.projeto}, {self.orgao_id})'
-
-    def get_all_tramites(self):
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-        data = datetime.now() - timedelta(days=15)
-        tramites = session.query(Tramites).filter(Tramites.orgaos_id == self.orgao_id, Tramites.created_at >= data).all()
-        if not tramites:
-            return []
-        return tramites
 
     def get_dou_xml(self, from_date: date, to_date: date):
         inlabCrawler = InlabsCrawler(self.projeto)
@@ -113,143 +91,6 @@ class DouCrawler:
                 diarios.append(dicionario)
         return diarios
 
-    def _select_termos(self, dados):
-        print("\n------------ Selecionando termos")
-        mask = dados['texto'].str.contains('|'.join(self.termos))
-        seleciona = dados[mask].copy()
-        seleciona['termo'] = seleciona['texto'].str.extract(f"({'|'.join(self.termos)})")
-        seleciona['termo'] = seleciona['termo'].str.strip()
-        seleciona['termos_id'] = seleciona['termo'].map(self.termos_lista)
-        print('Tramitações com Termos encontrados: ', len(seleciona))
-        return seleciona
-
-    def has_match(self, texto, termos):
-        regex = re.compile(fr'\b({"|".join(termos)})\b', flags=re.IGNORECASE)
-        return bool(regex.search(texto))
-
-    def select_termos(self, dados):
-        print("\n------------ Selecionando termos")
-        seleciona = dados[dados['texto'].apply(lambda x: self.has_match(x, self.termos))].copy()
-        seleciona['termo'] = seleciona['texto'].str.extract(fr"({'|'.join(self.termos)})", flags=re.IGNORECASE)
-        seleciona['termo'] = seleciona['termo'].str.strip()
-
-        correspondentes = []
-        for termo in seleciona['termo']:
-            
-            correspondente = self.termos_lista[termo]
-            correspondentes.append(correspondente)
-
-        seleciona['termos_id'] = correspondentes
-
-        print('Tramitações com Termos_ID: ', seleciona['termos_id'])
-        print('Tramitações com Termos: ', seleciona['termo'])
-        # input('------\n')
-
-        print('Tramitações com Termos encontrados:', len(seleciona))
-        return seleciona
-
-
-    def verifica_tramite(self, hash):
-        all_hash = [tramite.hashing for tramite in self.all_tramites_hash]
-        if hash in all_hash:
-            return self.all_tramites_hash[all_hash.index(hash)]
-        else:
-            return None
-        
-    def make_hash(self, texto):
-        return hashlib.md5(texto.encode()).hexdigest()
-              
-    def insert_data_db(self, dados):
-        print("\n------------ Inserindo dados")
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-        tramites_list = []
-
-        for index, row in dados.iterrows():
-            orgaos_id = self.orgao_id
-            resumo = row['texto']
-            data_origem = row['data']
-            autores = row['autores']
-            link_pdf = ''
-            link_web = row['link']
-            termo_id = row['termos_id']
-
-            row = row.drop('texto')
-            row = row.drop('data')
-            row = row.drop('autores')
-            row = row.drop('link')
-            row = row.drop('termos_id')
-            row = row.drop('termo')
-            detalhes = json.dumps(row.to_dict())
-            
-            hashing_payload = str(detalhes) + str(resumo) + str(data_origem) + str(autores) + str(link_pdf) + str(link_web)
-
-            hash = self.make_hash(hashing_payload)
-            tramite = self.verifica_tramite(hash)
-
-            if not tramite:
-                print('Tramite não Existe')
-                resumo_ia = summarize(resumo, self.projeto.openai_token) if self.projeto.openai_token else ''
-                tramite = Tramites(
-                    orgaos_id=orgaos_id,
-                    resumo=resumo,
-                    resumo_ia=resumo_ia,
-                    data_origem=data_origem,
-                    autores=autores,
-                    link_pdf=link_pdf,
-                    link_web=link_web,
-                    hashing=hash
-                )
-
-                try:
-                    session.add(tramite)
-                    session.commit()
-              
-                    print(f"Tramite inserido {tramite.id}")
-
-                    tramite_termo = TramitesHasTermos(
-                        tramites_id=tramite.id,
-                        termos_id=termo_id
-                    )
-                    session.add(tramite_termo)
-                    session.commit()
-                    print("Tramite_termo inserido")
-
-                    tramite_detalhes = TramiteDetalhes(
-                        tramites_id=tramite.id,
-                        json=detalhes
-                
-                    )
-                    session.add(tramite_detalhes)
-                    session.commit()
-                    print("Tramite_detalhes inserido")
-
-                    tramites_list.append(tramite.id)
-                except Exception as e:
-                    session.rollback()
-                    print(f'Erro ao inserir tramite {tramite.id}')
-                    print(e)
-            else:
-                print(f"Tramite já existe {tramite.id}")
-
-            projeto_id = self.projeto.id
-            tramite_projeto = session.query(ProjetosHasTramites).filter_by(tramites_id=tramite.id, projetos_id=projeto_id).first()
-
-            if not tramite_projeto:
-                print(f"* ProjetosHasTramites não existe")
-                tramite_projeto = ProjetosHasTramites(
-                    tramites_id=tramite.id,
-                    projetos_id=projeto_id
-                )
-                session.add(tramite_projeto)
-                session.commit()
-                print(f"+ ProjetosHasTramites inserido:\n -Projeto_ID {tramite_projeto.projetos_id} \n -Tramite_ID {tramite_projeto.tramites_id}\n")
-                tramites_list.append(tramite.id)
-            else:
-                print(f"ProjetosHasTramites já existe:\n -Projeto_ID {tramite_projeto.projetos_id} \n -Tramite_ID {tramite_projeto.tramites_id}\n")
-        session.close()
-        return tramites_list
-
     def delete_all_files(self):
         print("\n------------ Deletando arquivos")
         try:
@@ -258,7 +99,12 @@ class DouCrawler:
                 print("Arquivos deletados")
         except: 
             print("Não foi possivel deletar os arquivos")
-        
+    
+    def modify_column_names(self, dados):
+        dados['UrlPdf'] = ''
+        return dados
+
+
     def execute(self):
         print('---- Executando: DIARIO OFICIAL DA UNIÃO API')
         try:
@@ -266,9 +112,12 @@ class DouCrawler:
             info_xml = self.get_info_from_xml()
             dados = pd.DataFrame(info_xml)
             dados = self.select_termos(dados)
-            dados.to_csv('modulos/dou_api/dados/'+str(self.projeto.id)+'_dados.csv', index=False)
-            tramites_list = self.insert_data_db(dados)
+            # dados.to_csv('modulos/dou_api/dados/'+str(self.projeto.id)+'_dados.csv', index=False)
             self.delete_all_files()
+            
+            dados = self.modify_column_names(dados)
+            tramites_list = self.insert_data_db(dados)
+            
             return set(tramites_list)
         except Exception as e:
             print(f'Erro ao executar a API-DOU: {e}')
