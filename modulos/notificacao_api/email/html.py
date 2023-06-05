@@ -95,7 +95,6 @@ class HTML:
     def cria_html(self, tramite, termos, orgao):
 
         valores = self.monta_valores(tramite, termos, orgao)
-        # print(valores)
 
         insert_li = ""
         for k, v in valores.items():
