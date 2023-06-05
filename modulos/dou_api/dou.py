@@ -104,7 +104,6 @@ class DouCrawler(BaseOrgao):
         dados['UrlPdf'] = ''
         return dados
 
-
     def execute(self):
         print('---- Executando: DIARIO OFICIAL DA UNIÃO API')
         try:
@@ -114,7 +113,7 @@ class DouCrawler(BaseOrgao):
             dados = self.select_termos(dados)
             # dados.to_csv('modulos/dou_api/dados/'+str(self.projeto.id)+'_dados.csv', index=False)
             self.delete_all_files()
-            
+
             dados = self.modify_column_names(dados)
             tramites_list = self.insert_data_db(dados)
             

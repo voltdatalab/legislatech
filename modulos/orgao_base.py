@@ -5,7 +5,7 @@ from modulos.utils import summarize
 
 import db.conn as db
 from sqlalchemy.orm import sessionmaker
-from datetime import date, timedelta, datetime
+from datetime import timedelta, datetime
 from db.models import Tramites, TramiteDetalhes, TramitesHasTermos, ProjetosHasTramites
 
 import hashlib

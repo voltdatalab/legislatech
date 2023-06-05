@@ -59,11 +59,6 @@ class ProjectRunner:
             tramites_senado = SenadoCrawler(terms_dict, project).execute() if 'senado' in orgao_allow else []
             tramites_camara = CamaraCrawler(terms_dict, project).execute() if 'camara' in orgao_allow else []
     
-
-            # tramites_dou = {300, 301}
-            # tramites_senado = {147,148}
-            # tramites_camara = {160, 162}
-
             tramites_dou = tramites_dou[:12] if len(tramites_dou) > 12 else tramites_dou
             
             tramites = {
@@ -91,7 +86,6 @@ class ProjectRunner:
             print("--------\n\n\n\n")
 
         
-
 if __name__ == '__main__':
     
     if len(sys.argv) > 1:

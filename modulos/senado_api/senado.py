@@ -8,7 +8,6 @@ import pandas as pd
 from modulos.orgao_base import BaseOrgao
 
 class SenadoCrawler(BaseOrgao):
-
     def __init__(self, termos, projeto):
         super().__init__(termos=termos, projeto=projeto, orgao_id=3)
 

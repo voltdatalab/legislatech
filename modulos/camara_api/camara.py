@@ -4,16 +4,8 @@ from datetime import date, timedelta
 from datetime import datetime
 import requests
 import pandas as pd
-import hashlib
-import json
 import re
-import hashlib
 
-from sqlalchemy.orm import sessionmaker
-import db.conn as db
-from modulos.utils import summarize
-
-from db.models import Tramites, TramiteDetalhes, TramitesHasTermos, ProjetosHasTramites
 from modulos.orgao_base import BaseOrgao
 
 
