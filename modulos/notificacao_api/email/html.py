@@ -11,6 +11,7 @@ from datetime import datetime
 class HTML:
     def __init__(self, email_id, tramites, projeto):
         self.projeto = projeto
+        self.projeto_all_termos = self.get_termos_by_projeto()
         self.tramites = tramites
         self.email_id = email_id
         self.email = self.get_email_conf()
@@ -45,6 +46,7 @@ class HTML:
         if not termos:
             raise NoResultFound(f"Termos {termos} não encontrado.\n")
         termos = [termo.nome.upper() for termo in termos]
+        session.close()
         return termos
     
     def get_termos_by_tramite(self, tramite_id):
@@ -54,7 +56,8 @@ class HTML:
         if not termos:
             raise NoResultFound(f"Termos {termos} não encontrado.\n")
         termos = [termo.nome.upper() for termo in termos]
-        termo = self.verify_termos(termos, self.get_termos_by_projeto())
+        termo = self.verify_termos(termos, self.projeto_all_termos)
+        session.close()
         return termo
 
     def get_tramites_detalhes(self, tramite_id):
@@ -63,6 +66,7 @@ class HTML:
         tramites_detalhes = session.query(TramiteDetalhes).filter(TramiteDetalhes.tramites_id == tramite_id).first()
         if not tramites_detalhes:
             raise NoResultFound(f"TramitesDetalhes {tramites_detalhes} não encontrado.\n")
+        session.close()
         return tramites_detalhes
     
     def monta_valores(self, tramite, termos, orgao):
