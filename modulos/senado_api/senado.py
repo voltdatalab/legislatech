@@ -130,7 +130,7 @@ class SenadoCrawler(BaseOrgao):
             # tramites.to_csv("modulos/senado_api/dados/tramitando"+str(self.projeto.id)+".csv", index=False)
             dados = self.select_termos(tramites)
             if dados.empty:
-                print('Nenhum tramite encontrado com os termos selecionados')
+                print('Nenhum tramite encontrado com os termos selecionados.\n')
                 return set()
             df_tramitando = self.get_last_situacao(dados)
             dados = self.get_urls(df_tramitando)

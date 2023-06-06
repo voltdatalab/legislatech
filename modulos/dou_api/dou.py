@@ -111,11 +111,15 @@ class DouCrawler(BaseOrgao):
             info_xml = self.get_info_from_xml()
             dados = pd.DataFrame(info_xml)
             dados = self.select_termos(dados)
+            
+            if dados.empty:
+                print('Nenhum tramite encontrado com os termos selecionados.\n')
+                return set()
             # dados.to_csv('modulos/dou_api/dados/'+str(self.projeto.id)+'_dados.csv', index=False)
-            self.delete_all_files()
 
             dados = self.modify_column_names(dados)
             tramites_list = self.insert_data_db(dados)
+            self.delete_all_files()
             
             return set(tramites_list)
         except Exception as e:

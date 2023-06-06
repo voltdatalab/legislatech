@@ -36,7 +36,7 @@ class SendNotification:
         
         if self.is_email:
             print(" - Enviando email")
-            HTML(self.is_email, self.tramites).execute()
+            HTML(self.is_email, self.tramites, self.projeto).execute()
         
         if self.is_whatsapp:
             print(" - Enviando whatsapp")

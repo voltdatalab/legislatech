@@ -161,7 +161,7 @@ class CamaraCrawler(BaseOrgao):
             tramites = self.get_tramites()
             termos = self.select_termos(tramites)
             if termos.empty:
-                print('Nenhum tramite encontrado com os termos selecionados')
+                print('Nenhum tramite encontrado com os termos selecionados.\n')
                 return set()
             # termos.to_csv('modulos/camara_api/dados/termos.csv', index=False)
             autores = self.get_autores(termos)

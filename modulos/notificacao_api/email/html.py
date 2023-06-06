@@ -3,13 +3,14 @@ import db.conn as db
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
-from db.models import EmailConf, Tramites, TramitesHasTermos, Termos, TramiteDetalhes
+from db.models import EmailConf, Tramites, TramitesHasTermos, Termos, TramiteDetalhes, ProjetosHasTermos
 from modulos.notificacao_api.email.send_email import Email
 
 from datetime import datetime
 
 class HTML:
-    def __init__(self, email_id, tramites):
+    def __init__(self, email_id, tramites, projeto):
+        self.projeto = projeto
         self.tramites = tramites
         self.email_id = email_id
         self.email = self.get_email_conf()
@@ -31,6 +32,21 @@ class HTML:
             raise NoResultFound(f"Tramites {tramites} não encontrado.\n")
         return tramites
 
+    def verify_termos(self, termos_tramites, termos_projetos):
+        for termo in termos_tramites:
+            if termo in termos_projetos:
+                return termo
+        return termos_tramites[0]
+
+    def get_termos_by_projeto(self):
+        Session = sessionmaker(bind=db.run())
+        session = Session()
+        termos = session.query(Termos).join(ProjetosHasTermos).filter(ProjetosHasTermos.projetos_id == self.projeto.id).all()
+        if not termos:
+            raise NoResultFound(f"Termos {termos} não encontrado.\n")
+        termos = [termo.nome.upper() for termo in termos]
+        return termos
+    
     def get_termos_by_tramite(self, tramite_id):
         Session = sessionmaker(bind=db.run())
         session = Session()
@@ -38,7 +54,8 @@ class HTML:
         if not termos:
             raise NoResultFound(f"Termos {termos} não encontrado.\n")
         termos = [termo.nome.upper() for termo in termos]
-        return termos
+        termo = self.verify_termos(termos, self.get_termos_by_projeto())
+        return termo
 
     def get_tramites_detalhes(self, tramite_id):
         Session = sessionmaker(bind=db.run())
