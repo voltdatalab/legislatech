@@ -1,5 +1,4 @@
 import openai
-import os.path  # paths do sistema
 import os       # ler variaveis de ambiente
 
 def summarize(text, token_key):

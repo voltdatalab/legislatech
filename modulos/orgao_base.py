@@ -63,6 +63,17 @@ class BaseOrgao:
         print('Tramitações com Termos encontrados:', len(seleciona))
         return seleciona
 
+    def get_termosid_by_tramite(self, tramite):
+        Session = sessionmaker(bind=db.run())
+        session = Session()
+
+        termos_tramite_list = []
+        termos_tramite = session.query(TramitesHasTermos).filter_by(tramites_id=tramite.id).all()
+        for termo_tramite in termos_tramite:
+            termos_tramite_list.append(termo_tramite.termos_id)
+        session.close()
+        return termos_tramite_list
+    
     def insert_data_db(self, dados):
         print("\n------------ Inserindo dados")
         Session = sessionmaker(bind=db.run())
@@ -143,6 +154,18 @@ class BaseOrgao:
                 )
                 session.add(tramite_projeto)
                 session.commit()
+
+                termos_tramite_list = self.get_termosid_by_tramite(tramite)
+                if termo_id not in termos_tramite_list:
+                    print(f"Termos já existente no Tramite: {termos_tramite_list}")
+                    tramite_termo = TramitesHasTermos(
+                        tramites_id=tramite.id,
+                        termos_id=termo_id
+                    )
+                    session.add(tramite_termo)
+                    session.commit()
+                    print(f"*Novo Tramite_termo inserido:\n -Tramite_ID {tramite_termo.tramites_id} \n -Termo_ID {tramite_termo.termos_id}\n")
+
                 print(f"+ ProjetosHasTramites inserido:\n -Projeto_ID {tramite_projeto.projetos_id} \n -Tramite_ID {tramite_projeto.tramites_id}\n")
                 tramites_list.append(tramite.id)
             else:
