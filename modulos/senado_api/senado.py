@@ -129,6 +129,7 @@ class SenadoCrawler(BaseOrgao):
             tramites = self.get_tramites()
             # tramites.to_csv("modulos/senado_api/dados/tramitando"+str(self.projeto.id)+".csv", index=False)
             dados = self.select_termos(tramites)
+
             if dados.empty:
                 print('Nenhum tramite encontrado com os termos selecionados.\n')
                 return set()
@@ -137,6 +138,7 @@ class SenadoCrawler(BaseOrgao):
             # dados.to_csv("modulos/senado_api/dados/tramitando_filtrados"+str(self.projeto.id)+".csv", index=False)
             
             dados = self.modify_column_names(dados)
+            
             tramites_list = self.insert_data_db(dados)
 
             return set(tramites_list)

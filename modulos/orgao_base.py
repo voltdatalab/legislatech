@@ -50,9 +50,10 @@ class BaseOrgao:
         seleciona['termo'] = seleciona['termo'].str.strip()
 
         correspondentes = []
+
         for termo in seleciona['termo']:
-            
-            correspondente = self.termos_lista[termo]
+            print(termo)
+            correspondente = self.termos_lista[termo.lower()]
             correspondentes.append(correspondente)
 
         seleciona['termos_id'] = correspondentes
