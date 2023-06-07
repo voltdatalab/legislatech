@@ -44,7 +44,7 @@ class HTML:
         session = Session()
         termos = session.query(Termos).join(ProjetosHasTermos).filter(ProjetosHasTermos.projetos_id == self.projeto.id).all()
         if not termos:
-            raise NoResultFound(f"Termos {termos} não encontrado.\n")
+            raise NoResultFound(f"get_termos_by_projeto {self.projeto.id} não encontrado.\n")
         termos = [termo.nome.upper() for termo in termos]
         session.close()
         return termos
@@ -54,7 +54,7 @@ class HTML:
         session = Session()
         termos = session.query(Termos).join(TramitesHasTermos).filter(TramitesHasTermos.tramites_id == tramite_id).all()
         if not termos:
-            raise NoResultFound(f"Termos {termos} não encontrado.\n")
+            raise NoResultFound(f"get_termos_by_tramite {tramite_id} não encontrado.\n")
         termos = [termo.nome.upper() for termo in termos]
         termo = self.verify_termos(termos, self.projeto_all_termos)
         session.close()
@@ -75,7 +75,8 @@ class HTML:
         data = datetime.strptime(tramite.data_origem, '%Y-%m-%d %H:%M:%S').strftime('%d-%m-%Y')
         
         valores['data'] = data
-        valores['tema'] = ', '.join(termos)
+        # valores['tema'] = ', '.join(termos)
+        valores['tema'] = termos
         valores['nome'] = tramite.autores if tramite.autores else None
 
         valores['resumo'] = tramite.resumo_ia if tramite.resumo_ia else tramite.resumo[:500] + '...'
@@ -95,7 +96,8 @@ class HTML:
         if orgao == 'camara':
             valores['titulo'] = f"CÂMARA: {detalhes['siglaTipo']} {detalhes['numero']}/{detalhes['ano']}"
             valores['tramitacao'] = detalhes['statusProposicao_descricaoTramitacao']
-            valores['situacao'] = detalhes['statusProposicao_descricaoSituacao']
+            if detalhes['statusProposicao_descricaoSituacao'] != 'None' or detalhes['statusProposicao_descricaoSituacao'] != None:
+                valores['situacao'] = detalhes['statusProposicao_descricaoSituacao']
 
         if orgao == 'senado':
             valores['titulo'] = f"SENADO: {detalhes['DescricaoIdentificacaoMateria']}"
@@ -123,7 +125,7 @@ class HTML:
             if k == 'resumo':
                 insert_li += f"""
                 <li style="font-size:14px;list-style-type:square;">
-                    <strong>Resumo da descrição:</strong> {v.capitalize()}
+                    <strong>Resumo da descrição:</strong> {str(v).capitalize()}
                 </li>
                 """
 
@@ -227,15 +229,14 @@ class HTML:
             (tramites_dou, 'dou')
         ]
 
-
         for tramite_list, tipo in tramites:
             print(f"--Quantidade de Tramites {tipo.upper()}: {len(tramite_list)}")
             for tramite in tramite_list:
                 print(f"----Tramite {tipo.upper()}: {tramite.id}")
-                termos = self.get_termos_by_tramite(tramite.id)
-                all_termos.extend(termos)
-                tramites_html += self.cria_html(tramite, termos, tipo)
-
+                termo = self.get_termos_by_tramite(tramite.id)
+                all_termos.append(termo)
+                tramites_html += self.cria_html(tramite, termo, tipo)
+        
         all_tramites = list(set(tramites_dou + tramites_senado + tramites_camara))
         all_termos = list(set(all_termos))
         
@@ -249,7 +250,6 @@ class HTML:
         self.template = self.template.replace("{{frase_tema}}", str(frase_tema))
 
         temas = all_termos
-        temas = [t.replace('.', '') for t in temas]
         temas = ', '.join(temas)
         self.template = self.template.replace("{{temas}}", str(temas))
 

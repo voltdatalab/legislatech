@@ -125,7 +125,7 @@ class SenadoCrawler(BaseOrgao):
 
     def execute(self):
         try:
-            print('---- Executando: SENADO API')
+            print('+---------------------- Executando: SENADO API')
             tramites = self.get_tramites()
             # tramites.to_csv("modulos/senado_api/dados/tramitando"+str(self.projeto.id)+".csv", index=False)
             dados = self.select_termos(tramites)
@@ -140,6 +140,7 @@ class SenadoCrawler(BaseOrgao):
             dados = self.modify_column_names(dados)
             
             tramites_list = self.insert_data_db(dados)
+            print('Finalizado: SENADO API: ', len(tramites_list), 'tramites encontrados.\n')
 
             return set(tramites_list)
         except Exception as e:

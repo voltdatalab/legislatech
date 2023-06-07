@@ -55,23 +55,20 @@ class ProjectRunner:
             print("Termos: ", terms_dict)
             print("Orgao: ", orgao_allow)
 
-            # tramites_dou = DouCrawler(terms_dict, project).execute() if 'dou' in orgao_allow else []
+            tramites_dou = DouCrawler(terms_dict, project).execute() if 'dou' in orgao_allow else []
             tramites_senado = SenadoCrawler(terms_dict, project).execute() if 'senado' in orgao_allow else []
             tramites_camara = CamaraCrawler(terms_dict, project).execute() if 'camara' in orgao_allow else []
 
-            tramites_dou = []
-            tramites_dou = tramites_dou[:12] if len(tramites_dou) > 12 else tramites_dou
-            
+            tramites_dou = {tramites_dou.pop() for _ in range(12)} if len(tramites_dou) > 12 else tramites_dou
+
             tramites = {
                 'senado': tramites_senado,
                 'camara': tramites_camara,
                 'dou': tramites_dou
             }
-          
+
             sendNotification = SendNotification(tramites, project)
             sendNotification.execute()
-
-
 
         except NoResultFound as e:
             print(" - NoResultFound")

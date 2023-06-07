@@ -8,7 +8,6 @@ import re
 
 from modulos.orgao_base import BaseOrgao
 
-
 class CamaraCrawler(BaseOrgao):
 
     def __init__(self, termos, projeto):
@@ -156,10 +155,11 @@ class CamaraCrawler(BaseOrgao):
         return dados
 
     def execute(self):
-        print('---- Executando: CAMARA API')
+        print('+---------------------- Executando: CAMARA API')
         try:
             tramites = self.get_tramites()
             termos = self.select_termos(tramites)
+
             if termos.empty:
                 print('Nenhum tramite encontrado com os termos selecionados.\n')
                 return set()
@@ -168,14 +168,16 @@ class CamaraCrawler(BaseOrgao):
             # autores.to_csv('modulos/camara_api/dados/autores.csv', index=False)
             dados = self.get_detalhes(autores)
             # dados.to_csv(f'modulos/camara_api/dados/dados_{str(self.projeto.id)}.csv', index=False)
+
             
             dados = self.modify_column_names(dados)
             
             tramites_list = self.insert_data_db(dados)
+            print('Finalizado: CAMARA API: ', len(tramites_list), 'tramites encontrados.\n')
 
             return set(tramites_list)
         except Exception as e:
-            print(f'Erro ao executar a API-SENADO: {e}')
+            print(f'Erro ao executar a API-CAMARA: {e}')
             return set()
 
 

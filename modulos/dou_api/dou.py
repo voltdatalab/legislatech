@@ -105,7 +105,7 @@ class DouCrawler(BaseOrgao):
         return dados
 
     def execute(self):
-        print('---- Executando: DIARIO OFICIAL DA UNIÃO API')
+        print('+---------------------- Executando: DIARIO OFICIAL DA UNIÃO API')
         try:
             self.get_dou_xml(date.today(), date.today())
             info_xml = self.get_info_from_xml()
@@ -120,6 +120,7 @@ class DouCrawler(BaseOrgao):
             dados = self.modify_column_names(dados)
             tramites_list = self.insert_data_db(dados)
             self.delete_all_files()
+            print('Finalizado: DOU API: ', len(tramites_list), 'tramites encontrados.\n')
             
             return set(tramites_list)
         except Exception as e:

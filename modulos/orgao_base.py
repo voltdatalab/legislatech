@@ -52,7 +52,6 @@ class BaseOrgao:
         correspondentes = []
 
         for termo in seleciona['termo']:
-            print(termo)
             correspondente = self.termos_lista[termo.lower()]
             correspondentes.append(correspondente)
 
