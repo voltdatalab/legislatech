@@ -10,13 +10,13 @@ from datetime import datetime
 
 class HTML:
     def __init__(self, email_id, tramites, projeto):
+        self.Session = sessionmaker(bind=db.run())
         self.projeto = projeto
         self.projeto_all_termos = self.get_termos_by_projeto()
         self.tramites = tramites
         self.email_id = email_id
         self.email = self.get_email_conf()
         self.template = self.email.html_template
-        self.Session = sessionmaker(bind=db.run())
 
     def get_email_conf(self):
         with self.Session() as session:
