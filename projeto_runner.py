@@ -14,27 +14,28 @@ from modulos.notificacao_api.notificacao import SendNotification
 
 class ProjectRunner:
     def __init__(self):
-        Session = sessionmaker(bind=db.run())
-        self.session = Session()
+        self.Session = sessionmaker(bind=db.run())
 
     def get_project_by_name(self, name):
-        project = self.session.query(Projetos).filter(Projetos.nome == name).first()
-        if not project:
-            raise NoResultFound(f"Projeto {name} não encontrado.\n")
+        with self.Session() as session:
+            project = session.query(Projetos).filter(Projetos.nome == name).first()
+            if not project:
+                raise NoResultFound(f"Projeto {name} não encontrado.\n")
         return project
 
     def get_terms_by_project(self, project):
-        terms = self.session.query(Termos).join(ProjetosHasTermos).filter(ProjetosHasTermos.projetos_id == project.id).all()
-        if not terms:
-            raise NoResultFound(f"Termos do projeto {project.nome} não encontrados.\n")
+        with self.Session() as session:
+            terms = session.query(Termos).join(ProjetosHasTermos).filter(ProjetosHasTermos.projetos_id == project.id).all()
+            if not terms:
+                raise NoResultFound(f"Termos do projeto {project.nome} não encontrados.\n")
         return terms
     
     def get_orgao_by_project(self, project):
-    
-        orgaos = self.session.query(Orgaos).join(ProjetosHasOrgaos).filter(ProjetosHasOrgaos.projetos_id == project.id).all()
-        if not orgaos:
-            raise NoResultFound(f"Orgao do projeto {project.nome} não encontrado.\n")
-        orgao_names = [orgao.nome for orgao in orgaos]
+        with self.Session() as session:
+            orgaos = session.query(Orgaos).join(ProjetosHasOrgaos).filter(ProjetosHasOrgaos.projetos_id == project.id).all()
+            if not orgaos:
+                raise NoResultFound(f"Orgao do projeto {project.nome} não encontrado.\n")
+            orgao_names = [orgao.nome for orgao in orgaos]
         return orgao_names
 
     def run(self, name):
@@ -54,7 +55,6 @@ class ProjectRunner:
 
             print("Termos: ", terms_dict)
             print("Orgao: ", orgao_allow)
-
             tramites_dou = DouCrawler(terms_dict, project).execute() if 'dou' in orgao_allow else []
             tramites_senado = SenadoCrawler(terms_dict, project).execute() if 'senado' in orgao_allow else []
             tramites_camara = CamaraCrawler(terms_dict, project).execute() if 'camara' in orgao_allow else []

@@ -14,19 +14,19 @@ import json
 
 class BaseOrgao:
     def __init__(self, termos, projeto, orgao_id):
+        self.Session = sessionmaker(bind=db.run())
         self.termos_lista = {termo.lower(): valor for termo, valor in termos.items()}
         self.termos = [ t.lower() for t in termos.keys() ]
         self.projeto = projeto
         self.orgao_id = orgao_id
         self.all_tramites_hash = self.get_all_tramites()
-
+        
     def get_all_tramites(self):
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-        data = datetime.now() - timedelta(days=15)
-        tramites = session.query(Tramites).filter(Tramites.orgaos_id == self.orgao_id, Tramites.created_at >= data).all()
-        if not tramites:
-            return []
+        with self.Session() as session:
+            data = datetime.now() - timedelta(days=15)
+            tramites = session.query(Tramites).filter(Tramites.orgaos_id == self.orgao_id, Tramites.created_at >= data).all()
+            if not tramites:
+                return []
         return tramites
 
     def verifica_tramite(self, hash):
@@ -64,112 +64,107 @@ class BaseOrgao:
         return seleciona
 
     def get_termosid_by_tramite(self, tramite):
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-
-        termos_tramite_list = []
-        termos_tramite = session.query(TramitesHasTermos).filter_by(tramites_id=tramite.id).all()
-        for termo_tramite in termos_tramite:
-            termos_tramite_list.append(termo_tramite.termos_id)
-        session.close()
+        with self.Session() as session:
+            termos_tramite_list = []
+            termos_tramite = session.query(TramitesHasTermos).filter_by(tramites_id=tramite.id).all()
+            for termo_tramite in termos_tramite:
+                termos_tramite_list.append(termo_tramite.termos_id)
         return termos_tramite_list
     
     def insert_data_db(self, dados):
         print("\n------------ Inserindo dados")
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-        tramites_list = []
+        with self.Session() as session:
+            tramites_list = []
 
-        for index, row in dados.iterrows():
-            orgaos_id = self.orgao_id
-            resumo = row['texto']
-            data_origem = row['data']
-            autores = row['autores']
-            link_pdf = row['UrlPdf']
-            link_web = row['link']
-            termo_id = row['termos_id']
+            for index, row in dados.iterrows():
+                orgaos_id = self.orgao_id
+                resumo = row['texto']
+                data_origem = row['data']
+                autores = row['autores']
+                link_pdf = row['UrlPdf']
+                link_web = row['link']
+                termo_id = row['termos_id']
 
-            row = row.drop(['texto', 'data', 'autores', 'UrlPdf', 'link', 'termos_id', 'termo'])
+                row = row.drop(['texto', 'data', 'autores', 'UrlPdf', 'link', 'termos_id', 'termo'])
 
-            detalhes = json.dumps(row.to_dict())
-            
-            hashing_payload = str(detalhes) + str(resumo) + str(data_origem) + str(autores) + str(link_pdf) + str(link_web)
-
-            hash = self.make_hash(hashing_payload)
-            tramite = self.verifica_tramite(hash)
-
-            if not tramite:
-                print('Tramite não Existe')
-                resumo_ia = summarize(resumo, self.projeto.openai_token) if self.projeto.openai_token else ''
-                tramite = Tramites(
-                    orgaos_id=orgaos_id,
-                    resumo=resumo,
-                    resumo_ia=resumo_ia,
-                    data_origem=data_origem,
-                    autores=autores,
-                    link_pdf=link_pdf,
-                    link_web=link_web,
-                    hashing=hash
-                )
-
-                try:
-                    session.add(tramite)
-                    session.commit()
-              
-                    print(f"Tramite inserido {tramite.id}")
-
-                    tramite_termo = TramitesHasTermos(
-                        tramites_id=tramite.id,
-                        termos_id=termo_id
-                    )
-                    session.add(tramite_termo)
-                    session.commit()
-                    print("Tramite_termo inserido")
-
-                    tramite_detalhes = TramiteDetalhes(
-                        tramites_id=tramite.id,
-                        json=detalhes
+                detalhes = json.dumps(row.to_dict())
                 
+                hashing_payload = str(detalhes) + str(resumo) + str(data_origem) + str(autores) + str(link_pdf) + str(link_web)
+
+                hash = self.make_hash(hashing_payload)
+                tramite = self.verifica_tramite(hash)
+
+                if not tramite:
+                    print('Tramite não Existe')
+                    resumo_ia = summarize(resumo, self.projeto.openai_token) if self.projeto.openai_token else ''
+                    tramite = Tramites(
+                        orgaos_id=orgaos_id,
+                        resumo=resumo,
+                        resumo_ia=resumo_ia,
+                        data_origem=data_origem,
+                        autores=autores,
+                        link_pdf=link_pdf,
+                        link_web=link_web,
+                        hashing=hash
                     )
-                    session.add(tramite_detalhes)
-                    session.commit()
-                    print("Tramite_detalhes inserido")
 
-                    tramites_list.append(tramite.id)
-                except Exception as e:
-                    session.rollback()
-                    print(f'Erro ao inserir tramite {tramite.id}')
-                    print(e)
-            else:
-                print(f"Tramite já existe {tramite.id}")
+                    try:
+                        session.add(tramite)
+                        session.commit()
+                
+                        print(f"Tramite inserido {tramite.id}")
 
-            projeto_id = self.projeto.id
-            tramite_projeto = session.query(ProjetosHasTramites).filter_by(tramites_id=tramite.id, projetos_id=projeto_id).first()
+                        tramite_termo = TramitesHasTermos(
+                            tramites_id=tramite.id,
+                            termos_id=termo_id
+                        )
+                        session.add(tramite_termo)
+                        session.commit()
+                        print("Tramite_termo inserido")
 
-            if not tramite_projeto:
-                print(f"* ProjetosHasTramites não existe")
-                tramite_projeto = ProjetosHasTramites(
-                    tramites_id=tramite.id,
-                    projetos_id=projeto_id
-                )
-                session.add(tramite_projeto)
-                session.commit()
+                        tramite_detalhes = TramiteDetalhes(
+                            tramites_id=tramite.id,
+                            json=detalhes
+                    
+                        )
+                        session.add(tramite_detalhes)
+                        session.commit()
+                        print("Tramite_detalhes inserido")
 
-                termos_tramite_list = self.get_termosid_by_tramite(tramite)
-                if termo_id not in termos_tramite_list:
-                    print(f"Termos já existente no Tramite: {termos_tramite_list}")
-                    tramite_termo = TramitesHasTermos(
+                        tramites_list.append(tramite.id)
+                    except Exception as e:
+                        session.rollback()
+                        print(f'Erro ao inserir tramite {tramite.id}')
+                        print(e)
+                else:
+                    print(f"Tramite já existe {tramite.id}")
+
+                projeto_id = self.projeto.id
+                tramite_projeto = session.query(ProjetosHasTramites).filter_by(tramites_id=tramite.id, projetos_id=projeto_id).first()
+
+                if not tramite_projeto:
+                    print(f"* ProjetosHasTramites não existe")
+                    tramite_projeto = ProjetosHasTramites(
                         tramites_id=tramite.id,
-                        termos_id=termo_id
+                        projetos_id=projeto_id
                     )
-                    session.add(tramite_termo)
+                    session.add(tramite_projeto)
                     session.commit()
-                    print(f"*Novo Tramite_termo inserido:\n -Tramite_ID {tramite_termo.tramites_id} \n -Termo_ID {tramite_termo.termos_id}\n")
 
-                print(f"+ ProjetosHasTramites inserido:\n -Projeto_ID {tramite_projeto.projetos_id} \n -Tramite_ID {tramite_projeto.tramites_id}\n")
-                tramites_list.append(tramite.id)
-            else:
-                print(f"ProjetosHasTramites já existe:\n -Projeto_ID {tramite_projeto.projetos_id} \n -Tramite_ID {tramite_projeto.tramites_id}\n")
-        
-        session.close()
+                    termos_tramite_list = self.get_termosid_by_tramite(tramite)
+                    if termo_id not in termos_tramite_list:
+                        print(f"Termos já existente no Tramite: {termos_tramite_list}")
+                        tramite_termo = TramitesHasTermos(
+                            tramites_id=tramite.id,
+                            termos_id=termo_id
+                        )
+                        session.add(tramite_termo)
+                        session.commit()
+                        print(f"*Novo Tramite_termo inserido:\n -Tramite_ID {tramite_termo.tramites_id} \n -Termo_ID {tramite_termo.termos_id}\n")
+
+                    print(f"+ ProjetosHasTramites inserido:\n -Projeto_ID {tramite_projeto.projetos_id} \n -Tramite_ID {tramite_projeto.tramites_id}\n")
+                    tramites_list.append(tramite.id)
+                else:
+                    print(f"ProjetosHasTramites já existe:\n -Projeto_ID {tramite_projeto.projetos_id} \n -Tramite_ID {tramite_projeto.tramites_id}\n")
+
         return tramites_list

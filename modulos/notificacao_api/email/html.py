@@ -16,21 +16,20 @@ class HTML:
         self.email_id = email_id
         self.email = self.get_email_conf()
         self.template = self.email.html_template
+        self.Session = sessionmaker(bind=db.run())
 
     def get_email_conf(self):
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-        email_conf = session.query(EmailConf).filter(EmailConf.id == self.email_id).first()
-        if not email_conf:
-            raise NoResultFound(f"EmailConf {self.email_id} não encontrado.\n")
+        with self.Session() as session:
+            email_conf = session.query(EmailConf).filter(EmailConf.id == self.email_id).first()
+            if not email_conf:
+                raise NoResultFound(f"EmailConf {self.email_id} não encontrado.\n")
         return email_conf
 
     def get_tramites_by_ids(self, tramites):
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-        tramites = session.query(Tramites).filter(Tramites.id.in_(tramites)).all()
-        if not tramites:
-            raise NoResultFound(f"Tramites {tramites} não encontrado.\n")
+        with self.Session() as session:
+            tramites = session.query(Tramites).filter(Tramites.id.in_(tramites)).all()
+            if not tramites:
+                raise NoResultFound(f"Tramites {tramites} não encontrado.\n")
         return tramites
 
     def verify_termos(self, termos_tramites, termos_projetos):
@@ -40,33 +39,27 @@ class HTML:
         return termos_tramites[0]
 
     def get_termos_by_projeto(self):
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-        termos = session.query(Termos).join(ProjetosHasTermos).filter(ProjetosHasTermos.projetos_id == self.projeto.id).all()
-        if not termos:
-            raise NoResultFound(f"get_termos_by_projeto {self.projeto.id} não encontrado.\n")
-        termos = [termo.nome.upper() for termo in termos]
-        session.close()
+        with self.Session() as session:
+            termos = session.query(Termos).join(ProjetosHasTermos).filter(ProjetosHasTermos.projetos_id == self.projeto.id).all()
+            if not termos:
+                raise NoResultFound(f"get_termos_by_projeto {self.projeto.id} não encontrado.\n")
+            termos = [termo.nome.upper() for termo in termos]
         return termos
     
     def get_termos_by_tramite(self, tramite_id):
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-        termos = session.query(Termos).join(TramitesHasTermos).filter(TramitesHasTermos.tramites_id == tramite_id).all()
-        if not termos:
-            raise NoResultFound(f"get_termos_by_tramite {tramite_id} não encontrado.\n")
-        termos = [termo.nome.upper() for termo in termos]
-        termo = self.verify_termos(termos, self.projeto_all_termos)
-        session.close()
+        with self.Session() as session:
+            termos = session.query(Termos).join(TramitesHasTermos).filter(TramitesHasTermos.tramites_id == tramite_id).all()
+            if not termos:
+                raise NoResultFound(f"get_termos_by_tramite {tramite_id} não encontrado.\n")
+            termos = [termo.nome.upper() for termo in termos]
+            termo = self.verify_termos(termos, self.projeto_all_termos)
         return termo
 
     def get_tramites_detalhes(self, tramite_id):
-        Session = sessionmaker(bind=db.run())
-        session = Session()
-        tramites_detalhes = session.query(TramiteDetalhes).filter(TramiteDetalhes.tramites_id == tramite_id).first()
-        if not tramites_detalhes:
-            raise NoResultFound(f"TramitesDetalhes {tramites_detalhes} não encontrado.\n")
-        session.close()
+        with self.Session() as session:
+            tramites_detalhes = session.query(TramiteDetalhes).filter(TramiteDetalhes.tramites_id == tramite_id).first()
+            if not tramites_detalhes:
+                raise NoResultFound(f"TramitesDetalhes {tramites_detalhes} não encontrado.\n")
         return tramites_detalhes
     
     def monta_valores(self, tramite, termos, orgao):
