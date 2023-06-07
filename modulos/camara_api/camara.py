@@ -1,7 +1,6 @@
 import sys
 sys.path.append('./')
-from datetime import date, timedelta
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 import pandas as pd
 import re

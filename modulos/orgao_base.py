@@ -13,6 +13,7 @@ import re
 import json
 
 class BaseOrgao:
+    
     def __init__(self, termos, projeto, orgao_id):
         self.Session = sessionmaker(bind=db.run())
         self.termos_lista = {termo.lower(): valor for termo, valor in termos.items()}

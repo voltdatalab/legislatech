@@ -13,6 +13,7 @@ from modulos.camara_api.camara import CamaraCrawler
 from modulos.notificacao_api.notificacao import SendNotification
 
 class ProjectRunner:
+
     def __init__(self):
         self.Session = sessionmaker(bind=db.run())
 
@@ -82,8 +83,7 @@ class ProjectRunner:
             print(f"Projeto {name} finalizado")
             print(f"Data:FIM    {data.day}/{data.month}/{data.year} - {data.hour}:{data.minute}:{data.second}")
             print("--------\n\n\n\n")
-
-        
+      
 if __name__ == '__main__':
     
     if len(sys.argv) > 1:

@@ -7,7 +7,6 @@ import glob
 from zipfile import ZipFile, BadZipFile
 import os
 from bs4 import BeautifulSoup
-from datetime import datetime
 import pandas as pd
 import re
 import shutil
@@ -15,6 +14,7 @@ import shutil
 from modulos.orgao_base import BaseOrgao
 
 class DouCrawler(BaseOrgao):
+
     def __init__(self, termos, projeto):
         super().__init__(termos=termos, projeto=projeto, orgao_id=1)
         
