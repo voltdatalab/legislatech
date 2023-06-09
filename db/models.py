@@ -9,6 +9,7 @@ class Projetos(Base):
     id = Column(Integer, primary_key=True)
     nome = Column(Text)
     cliente = Column(Text)
+    email = Column(Text)
     openai_token = Column(Text)
     shlink_token = Column(Text)
     
