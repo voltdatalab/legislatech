@@ -10,6 +10,7 @@ class Projetos(Base):
     nome = Column(Text)
     cliente = Column(Text)
     email = Column(Text)
+    qtd_termos = Column(Integer)
     openai_token = Column(Text)
     shlink_token = Column(Text)
     
@@ -24,7 +25,7 @@ class Projetos(Base):
     deleted_at = Column(DateTime)
 
     def __repr__(self):
-        return "<Projetos(id='%s', nome='%s', cliente='%s', openai_token='%s', shlink_token='%s', created_at='%s', updated_at='%s', deleted_at='%s')>" % (self.id, self.nome, self.cliente, self.openai_token, self.shlink_token, self.created_at, self.updated_at, self.deleted_at)
+        return "<Projetos(id='%s', nome='%s', cliente='%s',email='%s',qtd_termos='%s', openai_token='%s', shlink_token='%s', created_at='%s', updated_at='%s', deleted_at='%s')>" % (self.id, self.nome, self.cliente, self.email, self.qtd_termos, self.openai_token, self.shlink_token, self.created_at, self.updated_at, self.deleted_at)
 
 class EmailConf(Base):
     __tablename__ = 'email_conf'
