@@ -61,6 +61,8 @@ class ProjectRunner:
             tramites_camara = CamaraCrawler(terms_dict, project).execute() if 'camara' in orgao_allow else []
 
             tramites_dou = {tramites_dou.pop() for _ in range(12)} if len(tramites_dou) > 12 else tramites_dou
+            tramites_senado = {tramites_senado.pop() for _ in range(12)} if len(tramites_senado) > 12 else tramites_senado
+            tramites_camara = {tramites_camara.pop() for _ in range(12)} if len(tramites_camara) > 12 else tramites_camara
 
             tramites = {
                 'senado': tramites_senado,

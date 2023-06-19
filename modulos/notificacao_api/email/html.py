@@ -107,7 +107,17 @@ class HTML:
             del valores['url_pagina']
 
         return valores
-     
+
+    def orgao_color_title(self, orgao):
+        if orgao == 'dou':
+            color = 'antiquewhite'
+        if orgao == 'camara':
+            color = 'lightblue'
+        if orgao == 'senado':
+            color = 'lightgreen'
+        return f"""<p style="text-align:left;background: {color};">"""
+
+
     def cria_html(self, tramite, termos, orgao):
 
         valores = self.monta_valores(tramite, termos, orgao)
@@ -170,11 +180,13 @@ class HTML:
                     <strong>Link para Página:</strong> <a style=" color: black; font-weight: bold;" href="{v}">{v}</a>
                 </li>"""
 
+        orgao_title_color = self.orgao_color_title(orgao)
+
         tramite = f"""
             <div class="text-element paragraph">
                 <div
                     style="text-align: left;">
-                    <p style="text-align: left;">
+                    {orgao_title_color}
                         {valores['titulo']}
                     </p>
                     <ul style="color: rgb(51, 51, 51);">
