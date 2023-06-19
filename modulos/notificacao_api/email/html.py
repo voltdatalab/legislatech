@@ -115,8 +115,7 @@ class HTML:
             color = 'lightblue'
         if orgao == 'senado':
             color = 'lightgreen'
-        return f"""<p style="text-align:left;background: {color};">"""
-
+        return f"""<p style="text-align:left;background: {color};padding: 4px;font-weight: bold;">"""
 
     def cria_html(self, tramite, termos, orgao):
 
