@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     print(f"Bots Rodando: {nomes_bots}")
     print(f"Bots Rodando Tamanho: len({nomes_bots})\n")
-    input("")
+    # input("")
     threads = []
     for nome_bot in nomes_bots:
         thread = threading.Thread(target=run_project_runner, args=(nome_bot,), name=nome_bot)

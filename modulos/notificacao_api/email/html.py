@@ -9,13 +9,18 @@ from modulos.notificacao_api.email.send_email import Email
 from datetime import datetime
 
 class HTML:
-    def __init__(self, email_id, tramites, projeto):
+    def __init__(self, email_id, tramites, projeto, email_method='sendy', email_ses=None):
         self.Session = sessionmaker(bind=db.run())
         self.projeto = projeto
         self.projeto_all_termos = self.get_termos_by_projeto()
         self.tramites = tramites
         self.email_id = email_id
-        self.email = self.get_email_conf()
+        self.email_method = email_method
+        if email_method == 'sendy':
+            self.email = self.get_email_conf()
+        if email_method == 'ses':
+            self.email = email_ses
+
         self.template = self.email.html_template
 
     def get_email_conf(self):
@@ -266,8 +271,15 @@ class HTML:
         # print(f"Email {self.email}")
         print(f"Enviando email para {self.email_id}")
         self.monta_tramites()
+
+        if self.email_method == 'sendy':
+            print(" * Enviando email pelo Sendy")
+            Email.sendy(self.template, self.email)
         
-        Email.sendy(self.template, self.email)
+        if self.email_method == 'ses':
+            print(" * Enviando email pelo SES")
+            email = self.email.email
+            Email.ses(self.template, email)
 
 
         
