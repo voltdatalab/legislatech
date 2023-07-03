@@ -115,13 +115,13 @@ def create_users(dados):
     Session = sessionmaker(bind=db.run())
     with Session() as session:
         for d in dados:
-            input("Digite algo para prosseguir!\n")
+            # input("Digite algo para prosseguir!\n")
             config = definicoes[d['product_id']]
             
             # INSERT PROJETO
             projeto = Projetos(
                 nome = d['bot_name'],
-                cliente = d['cliente'],
+                cliente = d['product_id'],
                 email = d['email'],
                 qtd_termos = config['qtd_termos']
             )

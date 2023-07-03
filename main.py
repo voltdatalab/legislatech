@@ -48,14 +48,15 @@ if __name__ == '__main__':
     os.makedirs(logs_directory, exist_ok=True)
 
     nomes_bots = get_all_projects()
+
     print(f"Bots Rodando: {nomes_bots}")
     print(f"Bots Rodando Tamanho: len({nomes_bots})\n")
+    input("")
     threads = []
     for nome_bot in nomes_bots:
         thread = threading.Thread(target=run_project_runner, args=(nome_bot,), name=nome_bot)
         threads.append(thread)
         thread.start()
     
-    # Aguardar todas as threads concluírem
     for thread in threads:
         thread.join()
