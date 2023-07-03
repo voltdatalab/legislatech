@@ -15,3 +15,9 @@ python main.py
 nohup python -u projeto_runner.py "esg_bot" >> logs/esg_bot.log &
 ```
 
+### (CRON) Envia emails no final de semana
+
+```bash
+python scripts/send_weekly_email.py >> .logs/weekly_email.log
+```
+

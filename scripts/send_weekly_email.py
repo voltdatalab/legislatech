@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 import sys
+import os
+from concurrent.futures import ThreadPoolExecutor
 sys.path.append('./')
 from modulos.notificacao_api.email.html import HTML
 
@@ -208,11 +210,10 @@ def get_random_tramites(project_id, limite=15, past_days=7):
     return tramites
 
 
-projetos = get_all_projects()
 
-for p in projetos:
+def processar_projeto(projeto):
     try:
-        tramites = get_random_tramites(p.id, limite=15, past_days=7)
+        tramites = get_random_tramites(projeto.id, limite=15, past_days=7)
 
         email_obj = _email(
             html_template=template,
@@ -223,10 +224,20 @@ for p in projetos:
             footer="""Este projeto foi desenvolvido  por <a href="https://nucleo.jor.br">Núcleo Jornalismo</a>, enviado apenas para assinantes e apoiadores. <br><br> Se recebeu isso de alguém e tem interesse, <a href="https://nucleo.jor.br/apoie/">acesse aqui para apoiar</a>.""",
             footer_sub="2023 - Brasil",
             link_privacy="https://nucleo.jor.br/privacidade/",
-            email=p.email
+            email=projeto.email
         )
 
-        print(p.id, p.nome)
-        HTML(p.id, tramites, p, email_method='ses', email_ses=email_obj).execute()
+        print(projeto.id, projeto.nome)
+        HTML(projeto.id, tramites, projeto, email_method='ses', email_ses=email_obj).execute()
     except Exception as e:
         print(e)
+
+
+def main():
+    projetos = get_all_projects()
+
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+        executor.map(processar_projeto, projetos)
+
+if __name__ == '__main__':
+    main()
