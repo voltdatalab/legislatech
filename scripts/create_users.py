@@ -22,13 +22,15 @@ definicoes = {
         "tier_name_debug": "Tecnologia",
         "qtd_termos": 3,
         "orgao": ['camara', 'senado'],
-        "qtd_email": 1
+        "qtd_email": 1,
+        "periodicidade_email": ['semanal']
     },
     "prod_LmXXyoCQqlr0Fp" : {
         "tier_name_debug": "Missão",
         "qtd_termos": 10,
         "orgao": ['camara', 'senado', 'dou'],
-        "qtd_email": 1
+        "qtd_email": 1,
+        "periodicidade_email": ['semanal', 'diario']
     }
 }
 

@@ -187,6 +187,15 @@ def get_all_orgao_by_project(project_id):
             raise NoResultFound("Nenhum orgao encontrado.\n")
     return orgaos
 
+def verify_empty_tramites(tramites):
+    count_empty = 0
+    for key, value in tramites.items():
+        if not value:
+            count_empty += 1
+    if count_empty == len(tramites):
+        return True
+    return False
+
 def get_random_tramites(project_id, limite=15, past_days=7):
     Session = sessionmaker(bind=db.run())
     orgaos = get_all_orgao_by_project(project_id)
@@ -214,6 +223,10 @@ def get_random_tramites(project_id, limite=15, past_days=7):
 def processar_projeto(projeto):
     try:
         tramites = get_random_tramites(projeto.id, limite=15, past_days=7)
+
+        if verify_empty_tramites(tramites):
+          print(" - Nenhum tramite novo encontrado para notificar")
+          return
 
         email_obj = _email(
             html_template=template,
