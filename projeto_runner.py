@@ -70,8 +70,8 @@ class ProjectRunner:
                 'dou': tramites_dou
             }
 
-            sendNotification = SendNotification(tramites, project)
-            sendNotification.execute()
+            # sendNotification = SendNotification(tramites, project)
+            # sendNotification.execute()
 
         except NoResultFound as e:
             print(" - NoResultFound")
