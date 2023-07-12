@@ -45,50 +45,60 @@ class DouCrawler(BaseOrgao):
         print(f'Buscando arquivos XML do projeto {self.projeto.nome}')
         print(f'Foram encontrados {len(files)} arquivos XML.')
         for filename in files:
-            with open(filename, 'r') as f:
-                soup = BeautifulSoup(f.read(), 'lxml')
-                article = soup.find('article')
-                internal_soup = BeautifulSoup(soup.find('texto').text, 'html.parser')
-                autores = internal_soup.find_all('assina')
+            try:
+                with open(filename, 'r') as f:
+                    soup = BeautifulSoup(f.read(), 'lxml')
+                    article = soup.find('article')
+                    try:
+                        internal_soup = BeautifulSoup(soup.find('texto').text, 'html.parser')
+                        autores = internal_soup.find_all('assina')
 
-                autores_element = soup.find('texto').find('p', class_='assina')
-                autores = autores_element.text.title() if autores_element else None
-       
-                
-                texto = internal_soup.find_all(text=True, recursive=True)
-                texto = "\n".join(texto)
+                        autores_element = soup.find('texto').find('p', class_='assina')
+                        autores = autores_element.text.title() if autores_element else None
+                    except Exception as e:
+                        print(f'Erro ao buscar autores do arquivo {filename}')
+                        print(e)
+                        continue
 
-                padrao = r"<!\[CDATA\[(.*?)\]\]>"
-                identifica = soup.find('identifica').text.strip()
-                identifica = re.findall(padrao, identifica)
-                identifica = identifica[0] if len(identifica) > 0 else ''
 
-                dicionario = {
-                        'id': article['id'],
-                        'autores': autores,
-                        'nome': article['name'],
-                        'id_oficio': article.get('idoficio'),
-                        'nome_pub': article['pubname'],
-                        'tipo_art': article.get('arttype'),
-                        'data': datetime.strptime(article['pubdate'], '%d/%m/%Y'),
-                        'categoria_art': article.get('artcategory'),
-                        'num_pagina': article.get('numberpage'),
-                        'link': article['pdfpage'],
-                        'id_materia': article.get('idmateria'),
-                        'texto': texto.lower(),
-                        'identifica': identifica,
+                    
+                    texto = internal_soup.find_all(text=True, recursive=True)
+                    texto = "\n".join(texto)
 
-                        'classe_art': article.get('artclass'),
-                        'prioridade_destaque': article.get('highlightpriority'),
-                        'destaque': article.get('highlight'),
-                        'img_destaque': article.get('highlightimage'),
-                        'nome_img_destaque': article.get('highlightimagename'),
-                        'tam_art': article.get('artsize'),
-                        'notas_art': article.get('artnotes'),
-                        'num_edicao': article.get('editionnumber'),
-                        'tipo_destaque': article.get('highlighttype')
-                }
-                diarios.append(dicionario)
+                    padrao = r"<!\[CDATA\[(.*?)\]\]>"
+                    identifica = soup.find('identifica').text.strip()
+                    identifica = re.findall(padrao, identifica)
+                    identifica = identifica[0] if len(identifica) > 0 else ''
+
+                    dicionario = {
+                            'id': article['id'],
+                            'autores': autores,
+                            'nome': article['name'],
+                            'id_oficio': article.get('idoficio'),
+                            'nome_pub': article['pubname'],
+                            'tipo_art': article.get('arttype'),
+                            'data': datetime.strptime(article['pubdate'], '%d/%m/%Y'),
+                            'categoria_art': article.get('artcategory'),
+                            'num_pagina': article.get('numberpage'),
+                            'link': article['pdfpage'],
+                            'id_materia': article.get('idmateria'),
+                            'texto': texto.lower(),
+                            'identifica': identifica,
+
+                            'classe_art': article.get('artclass'),
+                            'prioridade_destaque': article.get('highlightpriority'),
+                            'destaque': article.get('highlight'),
+                            'img_destaque': article.get('highlightimage'),
+                            'nome_img_destaque': article.get('highlightimagename'),
+                            'tam_art': article.get('artsize'),
+                            'notas_art': article.get('artnotes'),
+                            'num_edicao': article.get('editionnumber'),
+                            'tipo_destaque': article.get('highlighttype')
+                    }
+                    diarios.append(dicionario)
+            except Exception as e:
+                print(f'Erro ao ler o arquivo {filename}: {e}')
+
         return diarios
 
     def delete_all_files(self):

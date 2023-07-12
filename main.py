@@ -49,8 +49,7 @@ if __name__ == '__main__':
 
     nomes_bots = get_all_projects()
 
-    print(f"Bots Rodando: {nomes_bots}")
-    print(f"Bots Rodando Tamanho: len({nomes_bots})\n")
+    print(f"Bots Rodando: ({len(nomes_bots)})\n")
     # input("")
     threads = []
     for nome_bot in nomes_bots:
