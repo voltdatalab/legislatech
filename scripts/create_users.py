@@ -15,7 +15,7 @@ import db.conn as db
 
 import db.conn as db
 from sqlalchemy.orm import sessionmaker
-from db.models import Projetos, ProjetosHasOrgaos, Orgaos
+from db.models import Projetos, ProjetosHasOrgaos, Orgaos, Periodicidade
 
 definicoes = {
     "prod_LmXWnIYLZz5hw7" : {
@@ -107,7 +107,6 @@ def get_all_orgaos():
     orgao = {o.nome: o.id for o in orgaos}
     return orgao
 
-
 def compare_ghost_project_emails(ghost, projetos):
     filtered_ghost = [m for m in ghost if m['email'] not in projetos]
     return filtered_ghost
@@ -154,6 +153,34 @@ def create_users(dados):
                         print(e)
                 print("-------------------")   
                 
+                # INSERT Periodicidade
+                diario = False;
+                semanal = False;
+                mensal = False;
+                for periodicidade in config['periodicidade_email']:
+                    if periodicidade == 'semanal':
+                        semanal = True
+
+                    if periodicidade == 'diario':
+                        diario = True
+                
+                    if periodicidade == 'mensal':
+                        mensal = True
+                
+                try:
+                    periodicidade = Periodicidade(
+                        projetos_id = projeto.id,
+                        day = diario,
+                        week = semanal,
+                        month = mensal
+                    )
+                    session.add(periodicidade)
+                    session.commit()
+                    print(f"Periodicidade inserida {periodicidade}")
+                except Exception as e:
+                    print(f"Erro ao inserir a periodicidade {periodicidade}")
+                    print(e)
+
                 # TODO - Inserir mais de um email
                 if config['qtd_email'] > 1:
                     print("Ainda não implementando, talvez chamar uma função!")
@@ -161,11 +188,9 @@ def create_users(dados):
             except Exception as e:
                 print("Erro ao Inserir Projeto ", str(e))
 
-
 ghost_users = get_ghost_users()
 projetos = get_all_projetos_email()
 
 emails_filtrados = compare_ghost_project_emails(ghost_users, projetos)
 
 create_users(emails_filtrados)
-

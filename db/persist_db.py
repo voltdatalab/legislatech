@@ -20,8 +20,8 @@ tables = [
     TramitesHasTermos,
     ProjetosHasTermos,
     ProjetosHasOrgaos,
-    TermosHasCategorias
-
+    TermosHasCategorias,
+    Periodicidade
 ]
 for table in tables:
     table.__table__.create(bind=engine, checkfirst=True)

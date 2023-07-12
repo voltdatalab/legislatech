@@ -107,7 +107,6 @@ class DiscordConf(Base):
     def __repr__(self):
         return "<DiscordConf(id='%s', token='%s', chat_id='%s', created_at='%s', updated_at='%s', deleted_at='%s')>" % (self.id, self.token, self.chat_id, self.created_at, self.updated_at, self.deleted_at)
 
-
 class Termos(Base):
     __tablename__ = 'termos'
     id = Column(Integer, primary_key=True)
@@ -240,4 +239,20 @@ class TermosHasCategorias(Base):
 
     def __repr__(self):
         return "<TermosHasCategorias(termos_id='%s', categorias_id='%s', created_at='%s', updated_at='%s', deleted_at='%s')>" % (
-            self.termos_id, self.categorias_id, self.created_at, self.updated_at, self.deleted_at)  
+            self.termos_id, self.categorias_id, self.created_at, self.updated_at, self.deleted_at)
+
+class Periodicidade(Base):
+    __tablename__ = 'periodicidade'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    projetos_id = Column(Integer, ForeignKey('projetos.id'), primary_key=True)
+    day = Column(Boolean)
+    week = Column(Boolean)
+    month = Column(Boolean)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    deleted_at = Column(Text)
+
+    def __repr__(self):
+        return "<Periodicidade(periodicidade_id='%s', projetos_id='%s', day='%s', week='%s', month='%s', created_at='%s', updated_at='%s', deleted_at='%s')>" % (
+            self.id, self.projetos_id, self.day, self.week, self.month, self.created_at, self.updated_at, self.deleted_at)
