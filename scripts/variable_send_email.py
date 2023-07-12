@@ -10,7 +10,6 @@ from db.models import Projetos, ProjetosHasTermos, ProjetosHasTramites, Tramites
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import sessionmaker
 import db.conn as db
-
 import argparse
 
 template = """
@@ -262,7 +261,6 @@ def processar_projeto(projeto, limite=15, past_days=7):
         )
 
         print(projeto.id, projeto.nome)
-        # print(tramites)
 
         HTML(projeto.id, tramites, projeto, email_method='ses', email_ses=email_obj).execute()
     except Exception as e:

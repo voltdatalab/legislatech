@@ -9,7 +9,6 @@ import os
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
-import shutil
 
 from modulos.orgao_base import BaseOrgao
 
@@ -28,11 +27,11 @@ class DouCrawler(BaseOrgao):
         while day >= from_date:
             inlabCrawler.download(day)
             day_str = day.strftime('%Y-%m-%d')
-            for filename in glob.glob(f'modulos/dou_api/arquivos_zip/{str(self.projeto.id) + "_" +day_str}-*.zip', recursive=False):
+            for filename in glob.glob(f'modulos/dou_api/arquivos_zip/*.zip', recursive=False):
                 print(f'Extraindo {filename}')
                 try:
                     with ZipFile(filename, 'r') as zip_ref:
-                        zip_ref.extractall('modulos/dou_api/dados/'+str(self.projeto.id)+ "_" +day_str)
+                        zip_ref.extractall('modulos/dou_api/dados/')
                 except BadZipFile:
                     print(f'Arquivo .zip com erro: {filename}')
                 finally:
@@ -41,7 +40,7 @@ class DouCrawler(BaseOrgao):
     
     def get_info_from_xml(self):
         diarios = []
-        files = glob.glob('modulos/dou_api/dados/'+str(self.projeto.id)+'_*/*.xml')
+        files = glob.glob('modulos/dou_api/dados/*.xml')
         print(f'Buscando arquivos XML do projeto {self.projeto.nome}')
         print(f'Foram encontrados {len(files)} arquivos XML.')
         for filename in files:
@@ -100,15 +99,6 @@ class DouCrawler(BaseOrgao):
                 print(f'Erro ao ler o arquivo {filename}: {e}')
 
         return diarios
-
-    def delete_all_files(self):
-        print("\n------------ Deletando arquivos")
-        try:
-            for folder in glob.glob('modulos/dou_api/dados/'+str(self.projeto.id)+'_*'):
-                shutil.rmtree(folder)
-                print("Arquivos deletados")
-        except: 
-            print("Não foi possivel deletar os arquivos")
     
     def modify_column_names(self, dados):
         dados['UrlPdf'] = ''
@@ -117,7 +107,10 @@ class DouCrawler(BaseOrgao):
     def execute(self):
         print('+---------------------- Executando: DIARIO OFICIAL DA UNIÃO API')
         try:
-            self.get_dou_xml(date.today(), date.today())
+
+            if len(glob.glob('modulos/dou_api/dados/*')) == 0:
+                self.get_dou_xml(date.today(), date.today())
+        
             info_xml = self.get_info_from_xml()
             dados = pd.DataFrame(info_xml)
             dados = self.select_termos(dados)
@@ -125,11 +118,10 @@ class DouCrawler(BaseOrgao):
             if dados.empty:
                 print('Nenhum tramite encontrado com os termos selecionados.\n')
                 return set()
-            # dados.to_csv('modulos/dou_api/dados/'+str(self.projeto.id)+'_dados.csv', index=False)
 
             dados = self.modify_column_names(dados)
             tramites_list = self.insert_data_db(dados)
-            self.delete_all_files()
+
             print('Finalizado: DOU API: ', len(tramites_list), 'tramites encontrados.\n')
             
             return set(tramites_list)
