@@ -233,6 +233,11 @@ def get_random_tramites(project_id, limite=15, past_days=7):
             tmp_tramites = query.all()
             
             tramites[orgao.nome] = {t.id for t in tmp_tramites}
+          
+    for orgao in ['camara', 'senado', 'dou']:
+      if orgao not in tramites:
+          tramites[orgao] = set()
+
     return tramites
 
 def processar_projeto(projeto, limite=15, past_days=7):
@@ -257,9 +262,11 @@ def processar_projeto(projeto, limite=15, past_days=7):
         )
 
         print(projeto.id, projeto.nome)
+        # print(tramites)
+
         HTML(projeto.id, tramites, projeto, email_method='ses', email_ses=email_obj).execute()
     except Exception as e:
-        print(e)
+        print(f"Erro ao processar projeto {projeto.id}: {e}")
 
 def main(limite, past_days, periodicidade='week'):
     projetos = get_all_projects(periodicidade)
