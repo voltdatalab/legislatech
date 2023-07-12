@@ -231,8 +231,6 @@ def get_random_tramites(project_id, limite=15, past_days=7):
                 .limit(limite)
             
             tmp_tramites = query.all()
-            if not tmp_tramites:
-                raise NoResultFound("Nenhum tramite encontrado.\n")
             
             tramites[orgao.nome] = {t.id for t in tmp_tramites}
     return tramites
@@ -240,6 +238,7 @@ def get_random_tramites(project_id, limite=15, past_days=7):
 def processar_projeto(projeto, limite=15, past_days=7):
     try:
         tramites = get_random_tramites(projeto.id, limite, past_days)
+        print(f" - - {len(tramites)} tramites encontrados")
 
         if verify_empty_tramites(tramites):
           print(" - Nenhum tramite novo encontrado para notificar")
