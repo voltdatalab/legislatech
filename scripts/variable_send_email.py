@@ -251,7 +251,7 @@ def processar_projeto(projeto, limite=15, past_days=7):
 
         email_obj = _email(
             html_template=template,
-            notification_title="Seu relatório legislativo sobre Redes Sociais",
+            notification_title="Seu relatório legislativo.",
             logo="https://nucleo.jor.br/content/images/2022/06/landing-nucleo_logo-header.png",
             banner="https://pbs.twimg.com/profile_banners/1617523271129534467/1674594469/1500x500",
             notification_intro="Esse email foi produzido automaticamente.<p> </p> Este e-mail possui uma amostra dos Trâmites. <b>Acesse o Relatório completo em <a href='nucleo.jor.br/legislatech/'> LegislaTech</a></b>.",
