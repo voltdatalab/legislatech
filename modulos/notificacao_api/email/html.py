@@ -131,14 +131,14 @@ class HTML:
 
             if k == 'resumo':
                 insert_li += f"""
-                <li style="font-size:14px;list-style-type:square;">
+                <li style="font-size:16px;list-style-type:square;">
                     <strong>Resumo da descrição:</strong> {str(v).capitalize()}
                 </li>
                 """
 
             if k == 'data':
                 insert_li += f"""
-                    <li style="font-size:14px;list-style-type:square;">
+                    <li style="font-size:16px;list-style-type:square;">
                         <strong>Última atualização:</strong> {v} 
                     </li>
                 """
@@ -148,39 +148,39 @@ class HTML:
                 if len(v) > 130:
                     v = v[:127] + '...'
                 insert_li += f"""
-                <li style="font-size:14px;list-style-type:square;">
+                <li style="font-size:16px;list-style-type:square;">
                     <strong>Nome:</strong> {v}
                 </li>"""
                 
             if k == 'tema':
                 insert_li += f"""
-                <li style="font-size:14px;list-style-type:square;">
+                <li style="font-size:16px;list-style-type:square;">
                     <strong>Palavra-chave:</strong> {v}
                 </li>"""
 
             if k == 'tramitacao':
                 insert_li += f"""
-                <li style="font-size:14px;list-style-type:square;">
+                <li style="font-size:16px;list-style-type:square;">
                     <strong>Tramitação:</strong> {v}
                 </li>
                 """
 
             if k == 'situacao':
                 insert_li += f"""
-                <li style="font-size:14px;list-style-type:square;">
+                <li style="font-size:16px;list-style-type:square;">
                     <strong>Situação:</strong> {v}
                 </li>
                 """
 
             if k == 'url_pdf':
                 insert_li += f"""
-                <li style="font-size:14px;list-style-type:square;">
+                <li style="font-size:16px;list-style-type:square;">
                     <strong>Link para PDF:</strong> <a style="color: black; font-weight: bold;" href="{v}">{v}</a>
                 </li>"""
             
             if k == 'url_pagina':
                 insert_li += f"""
-                <li style="font-size:14px;list-style-type:square;">
+                <li style="font-size:16px;list-style-type:square;">
                     <strong>Link para Página:</strong> <a style=" color: black; font-weight: bold;" href="{v}">{v}</a>
                 </li>"""
 
