@@ -38,6 +38,7 @@ def get_all_projects():
             .join(ProjetosHasTermos)
             .group_by(Projetos.id)
             .having(func.count(ProjetosHasTermos.termos_id) > 0)
+            .order_by(Projetos.openai_token.isnot(None).desc())
             .all()
         )
         if not projects:
@@ -50,6 +51,7 @@ if __name__ == '__main__':
     nomes_bots = get_all_projects()
 
     print(f"Bots Rodando: ({len(nomes_bots)})\n")
+    print(f"Bots Names: ({nomes_bots})\n")
     # input("")
     threads = []
     for nome_bot in nomes_bots:
