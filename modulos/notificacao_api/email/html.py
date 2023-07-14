@@ -251,9 +251,9 @@ class HTML:
         
         n_tramites = len(all_tramites)
         if n_tramites == 1:
-            frase_tema = f"Foi detectado {n_tramites} trâmite envolvendo a"
+            frase_tema = f"Foi detectado {n_tramites} trâmite com o termo:"
         else:
-            frase_tema = f"Foram detectados {n_tramites} trâmites envolvendo as"
+            frase_tema = f"Foram detectados {n_tramites} trâmites com os termos:"
 
         self.template = self.template.replace("{{tramites}}", str(tramites_html))
         self.template = self.template.replace("{{frase_tema}}", str(frase_tema))

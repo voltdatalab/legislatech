@@ -94,8 +94,8 @@ template = """
               {{INTRO}}
               <br><br>
               {{frase_tema}}
-              palavras-chave:
-              <code>{{temas}}.</code>
+
+              <code>{{temas}}</code>
             </p>
 
           </td>
@@ -128,12 +128,12 @@ template = """
         </tr>
         <tr>
           <td style="margin-top:15px;padding:20x;text-align:center">
-              <img src="{{LOGO}}" width="50px" alt="logo">
+              <a href="https://nucle.ooo/auto-report-site-nucleo-legislatech"><img src="{{LOGO}}" width="50px" alt="logo"></a>
         </td>
         </tr>
         <tr>
           <td style="padding: 20px;font-size: 10px; text-align: center;margin-bottom:15px;font-family:monospace">
-            <a  href="{{LINK_PRIVACY}}">Política de Privacidade</a> | <unsubscribe>Cancelar recebimento</unsubscribe>
+            <a  href="{{LINK_PRIVACY}}">Política de Privacidade</a> | Para cancelar o recebimento acesse seu painel <a href="https://nucle.ooo/auto-report-legislatech"> nucleo.jor.br/legislatech</a>
           </td>
 
         </tr>
@@ -250,11 +250,13 @@ def processar_projeto(projeto, limite=15, past_days=7):
 
         email_obj = _email(
             html_template=template,
-            notification_title="Seu relatório legislativo.",
+            notification_title="Seu relatório Legislatech",
             logo="https://nucleo.jor.br/content/images/2022/06/landing-nucleo_logo-header.png",
-            banner="https://pbs.twimg.com/profile_banners/1617523271129534467/1674594469/1500x500",
-            notification_intro="Esse email foi produzido automaticamente.<p> </p> Este e-mail possui uma amostra dos Trâmites. <b>Acesse o Relatório completo em <a href='nucleo.jor.br/legislatech/'> LegislaTech</a></b>.",
-            footer="""Este projeto foi desenvolvido  por <a href="https://nucleo.jor.br">Núcleo Jornalismo</a>, enviado apenas para assinantes e apoiadores. <br><br> Se recebeu isso de alguém e tem interesse, <a href="https://nucleo.jor.br/apoie/">acesse aqui para apoiar</a>.""",
+            banner="https://assets.codepen.io/368146/header_1.png",
+            notification_intro="Esse email foi produzido e disparado automaticamente e possui uma amostra de até 15 itens por órgão monitorado. Para ver a relação completa de termos, acesse o painel em <a href='https://nucle.ooo/auto-report-legislatech'>nucleo.jor.br/legislaTech.</a>.",
+            footer="""O Legislatech foi desenvolvido pelo Núcleo Jornalismo e está disponível apenas para apoiadores e apoiadoras nos tiers <em>Tecnologia</em> e <em>Missão</em>.
+
+Se recebeu isso de alguém e tem interesse, <a href="https://nucle.ooo/auto-report-apoie-legislatech">clique aqui para apoiar</a>.""",
             footer_sub="2023 - Brasil",
             link_privacy="https://nucleo.jor.br/privacidade/",
             email=projeto.email
