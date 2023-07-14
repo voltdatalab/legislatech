@@ -250,10 +250,10 @@ def processar_projeto(projeto, limite=15, past_days=7):
 
         email_obj = _email(
             html_template=template,
-            notification_title="Seu relatório Legislatech",
+            notification_title="",
             logo="https://nucleo.jor.br/content/images/2022/06/landing-nucleo_logo-header.png",
             banner="https://assets.codepen.io/368146/header_1.png",
-            notification_intro="Esse email foi produzido e disparado automaticamente e possui uma amostra de até 15 itens por órgão monitorado. Para ver a relação completa de termos, acesse o painel em <a href='https://nucle.ooo/auto-report-legislatech'>nucleo.jor.br/legislaTech.</a>",
+            notification_intro="Esse email foi produzido e disparado automaticamente e possui uma amostra de até 15 itens por órgão monitorado. Para ver a relação completa de termos, acesse o painel em <a href='https://nucle.ooo/auto-report-legislatech'>nucleo.jor.br/legislatech</a>.",
             footer="""O Legislatech foi desenvolvido pelo Núcleo Jornalismo e está disponível apenas para apoiadores e apoiadoras nos tiers <em>Tecnologia</em> e <em>Missão</em>.
 
 Se recebeu isso de alguém e tem interesse, <a href="https://nucle.ooo/auto-report-apoie-legislatech">clique aqui para apoiar</a>.""",
