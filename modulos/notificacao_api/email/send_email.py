@@ -34,7 +34,7 @@ class Email:
         msg = MIMEMultipart()
         msg['From'] = from_address
         msg['To'] = to_address
-        msg['Subject'] = "Seu relatório Legislatech | " + dia_atual_string
+        msg['Subject'] = "🔎 Seu relatório de termos monitorados | " + dia_atual_string
 
 
         msg.attach(MIMEText(template, 'html'))
