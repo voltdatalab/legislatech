@@ -28,13 +28,13 @@ class Email:
         dia_atual_string = datetime.now().strftime("%d/%m/%Y")
 
         from_address = SMTP_SENDER
-        from_address = "Nucleo <{}>".format(from_address)
+        from_address = "Legislatech <{}>".format(from_address)
         to_address = email_addr
 
         msg = MIMEMultipart()
         msg['From'] = from_address
         msg['To'] = to_address
-        msg['Subject'] = "Seu relátorio Legislatech! " + dia_atual_string
+        msg['Subject'] = "Seu relatório Legislatech | " + dia_atual_string
 
 
         msg.attach(MIMEText(template, 'html'))
